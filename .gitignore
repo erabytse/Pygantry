@@ -1,0 +1,13 @@
+# Environnements
+.gantry_env/
+.pyc_env/
+__pycache__/
+*.pyc
+
+# Secrets du Founder (À NE JAMAIS PUBLIER)
+founder.key
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
