@@ -14,3 +14,11 @@ Why ship a whole Linux OS with Docker when you only need a Python environment?
 - **Small:** 15MB vs 500MB+ for Docker.
 - **Simple:** No daemon, no sudo, just Python.
 - **Portable:** Move your folder anywhere, it just works.
+
+
+---
+[![Python](https://img.shields.io/badge/Python-3.13-blue)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-Web_Framework-green)](https://flask.palletsprojects.com)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://typescriptlang.org)
+[![AI](https://img.shields.io/badge/AI-ML-orange)](https://pytorch.org)
+[![Founder](https://img.shields.io/badge/Founder-erabytse-purple)](https://github.com/erabytse)
