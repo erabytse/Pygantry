@@ -5,10 +5,18 @@ Why ship a whole Linux OS with Docker when you only need a Python environment?
 **Pygantry** packages your app and its dependencies into a portable, relocatable "Gantry" that works anywhere.
 
 ## 🚀 Quick Start
-1. **Init:** `python pyg.py init`
-2. **Build:** `python pyg.py build`
-3. **Run:** `python pyg.py run`
-4. **Ship:** `python pyg.py ship` -> Get a lightweight ZIP and send it!
+
+```cmd
+git clone https://github.com/erabytse/Pygantry.git
+cd Pygantry
+
+:: Windows (no installation needed)
+1. **Init:** `pyg init --name my_app`
+2. **Build:** `pyg build`
+3. **Run:** `pyg run`
+4. **Ship:** `pyg ship` -> Get a lightweight ZIP and send it!
+
+```
 
 ## 🌟 Why Pygantry?
 - **Small:** 15MB vs 500MB+ for Docker.
@@ -16,7 +24,45 @@ Why ship a whole Linux OS with Docker when you only need a Python environment?
 - **Portable:** Move your folder anywhere, it just works.
 
 
+## ⚠️ Honest Limitations
+
+Feature                            Status
+
+✅ Works on same machine           Fully supported
+
+⚠️ Relocation to another machine   Requires same Python version installed on target
+
+❌ Full Docker replacement         Not a security sandbox — use for deployment simplicity only
+
+
+💡 Philosophy: Pygantry solves deployment friction, not security isolation. Perfect for internal tools, prototypes, and edge devices where Docker is too heavy.
+
+
+## 📦 Installation (optional)
+
+```bash
+pip install pygantry
+pyg --help
+```
+
+## 🌍 Community
+
+⭐ Star if you like lightweight Python tools!
+🐞 Issues welcome — we respond within 24h
+📜 MIT License — free for commercial use
+
+
+Pygantry v1.2 — Simple by design
+Part of **[erabytse](https://erabytse.github.io)** — a quiet rebellion against digital waste.
+
 ---
+
+## 💙 Support 
+
+If you use and value this tool, consider supporting its development:  
+[![Sponsor](https://img.shields.io/badge/sponsor-erabytse-181717?logo=github)](https://github.com/sponsors/takouzlo)
+
+
 [![Python](https://img.shields.io/badge/Python-3.13-blue)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-Web_Framework-green)](https://flask.palletsprojects.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)](https://typescriptlang.org)

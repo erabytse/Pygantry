@@ -1,107 +1,100 @@
-import hashlib
+"""Stable engine for venv-based environments (no fragile relocation)."""
 import os
-import venv
-import subprocess
-import yaml
-import sys
 import shutil
+import subprocess
+import sys
+import venv
+import yaml
 
 class PyGantryEngine:
-    def __init__(self):
-        self.manifest_path = "Gantryfile"
-        self.env_dir = ".gantry_env"
+    def __init__(self, manifest_path="Gantryfile", env_dir=".gantry"):
+        self.manifest_path = manifest_path
+        self.env_dir = env_dir
 
-    def is_premium(self):
-        """Check if the Founder's key is valid."""
-        key_path = "founder.key"
-        if os.path.exists(key_path):
-            with open(key_path, "r") as f:
-                content = f.read().strip()
-                # On utilise un code secret (tu pourras le changer)
-                # On transforme la clé tapée en empreinte SHA-256
-                hashed_input = hashlib.sha256(content.encode()).hexdigest()
-                # L'empreinte ci-dessous correspond à "TON-CODE-SECRET"
-                return hashed_input == "4c7429e298b153d63dfe55f8d3819b8b5f08b5de04503033cfabebe8b5e52c14"
-        return False
-
-    def total_wipeout(self):
-        """Founder Only: Emergency cleanup of all environments."""
-        if self.is_premium():
-            shutil.rmtree(self.env_dir, ignore_errors=True)
-        else:
-            print("Access Denied: Premium Key Required.")
-
-
-    def create_manifest(self):
-        """Creates a professional Gantryfile."""
+    def create_manifest(self, project_name="my_app"):
         config = {
-            "project": "my_app",
+            "project": project_name,
             "python": f"{sys.version_info.major}.{sys.version_info.minor}",
-            "packages": ["cowsay", "pyyaml", "typer", "rich"], # On inclut les outils du moteur !
-            "entrypoint": "python -m cowsay -t 'Pygantry is Online'"
+            "packages": ["cowsay"],
+            "entrypoint": 'python -m cowsay -t "Pygantry v1.2 Online!"'
         }
-        with open(self.manifest_path, "w") as f:
-            yaml.dump(config, f)
+        with open(self.manifest_path, "w", encoding="utf-8") as f:
+            yaml.dump(config, f, sort_keys=False)
+        print(f"✓ Gantryfile created for '{project_name}'")
 
     def build(self):
-        """Build the isolated gantry environment with force-clean for Windows."""
         if os.path.exists(self.env_dir):
-            try:
-                shutil.rmtree(self.env_dir)
-            except Exception as e:
-                print(f"Warning: Could not clean old env, trying to continue... {e}")
-
-        # Use symlinks=False to force hard copies of python.exe
+            shutil.rmtree(self.env_dir, ignore_errors=True)
+        print("🏗️  Building environment...")
         venv.create(self.env_dir, with_pip=True, symlinks=False)
         
-        with open(self.manifest_path, "r") as f:
+        with open(self.manifest_path, encoding="utf-8") as f:
             config = yaml.safe_load(f)
         
-        bin_folder = "Scripts" if os.name == 'nt' else "bin"
-        pip_path = os.path.join(self.env_dir, bin_folder, "pip")
-
         packages = config.get("packages", [])
         if packages:
-            # Install all packages in one go
-            subprocess.run([pip_path, "install"] + packages, check=True)
+            print(f"   → Installing packages: {', '.join(packages)}")
+            bin_dir = "Scripts" if os.name == "nt" else "bin"
+            pip = os.path.join(self.env_dir, bin_dir, "pip")
+            subprocess.run([pip, "install", "-q"] + packages, check=True)
+        print(f"✅ Built in ./{self.env_dir}")
 
     def run(self):
-        """Execute the entrypoint and AUTO-REPAIR paths if moved."""
-        with open(self.manifest_path, "r") as f:
+        if not os.path.exists(self.env_dir):
+            raise RuntimeError("Run 'pyg build' first")
+        
+        with open(self.manifest_path, encoding="utf-8") as f:
             config = yaml.safe_load(f)
         
-        bin_folder = "Scripts" if os.name == 'nt' else "bin"
-        python_exe = "python.exe" if os.name == 'nt' else "python"
-        abs_python = os.path.abspath(os.path.join(self.env_dir, bin_folder, python_exe))
-
-        # --- AUTO-REPAIR LOGIC ---
-        if not os.path.exists(abs_python):
-             print("[Repairing Gantry Links...]")
-             # Ici on pourrait ajouter une logique de re-symlink si besoin
-        # -------------------------
-
+        bin_dir = "Scripts" if os.name == "nt" else "bin"
+        python = os.path.join(self.env_dir, bin_dir, "python.exe" if os.name == "nt" else "python")
         env = os.environ.copy()
         env["VIRTUAL_ENV"] = os.path.abspath(self.env_dir)
-        # FORCE le PATH pour que 'pip' et 'python' pointent ICI
-        env["PATH"] = os.path.dirname(abs_python) + os.pathsep + env.get("PATH", "")
-
-        entry = config.get("entrypoint")
-        # On injecte le python absolu détecté à l'instant T
-        cmd = entry.replace("python", f'"{abs_python}"', 1)
+        env["PATH"] = os.path.dirname(python) + os.pathsep + env.get("PATH", "")
         
-        subprocess.run(cmd, shell=True, env=env)
-
+        entry = config.get("entrypoint", "python --version")
+        if entry.startswith("python "):
+            entry = entry.replace("python ", f'"{python}" ', 1)
+        
+        print(f"🚀 {entry}")
+        subprocess.run(entry, shell=True, env=env)
 
     def ship(self):
-        """Logic to package the gantry into a ZIP file."""
-        with open(self.manifest_path, "r") as f:
+        if not os.path.exists(self.env_dir):
+            raise RuntimeError("Run 'pyg build' first")
+        
+        with open(self.manifest_path, encoding="utf-8") as f:
             config = yaml.safe_load(f)
         
-        project_name = config.get("project", "app")
-        ship_name = f"{project_name}_shipped"
-
-        # On crée l'archive
-        # On exclut souvent le dossier .gantry_env si on veut que l'user build lui-même,
-        # MAIS pour ton projet, on veut l'inclure pour la portabilité !
-        shutil.make_archive(ship_name, 'zip', root_dir=".", base_dir=None)
-        return f"{ship_name}.zip"
+        project = config.get("project", "app")
+        archive = f"{project}_v1.2"
+        
+        stage = ".ship_stage"
+        if os.path.exists(stage):
+            shutil.rmtree(stage)
+        os.makedirs(stage)
+        
+        shutil.copytree(self.env_dir, os.path.join(stage, self.env_dir))
+        shutil.copy2(self.manifest_path, os.path.join(stage, self.manifest_path))
+        
+        launcher = os.path.join(stage, "run.bat" if os.name == "nt" else "run.sh")
+        with open(launcher, "w", encoding="utf-8") as f:
+            if os.name == "nt":
+                f.write("@echo off\n")
+                f.write("echo [Pygantry] Starting...\n")
+                f.write("call .gantry\\Scripts\\activate.bat >nul 2>&1\n")
+                f.write("python -m cowsay \"Shipped with Pygantry v1.2!\"\n")
+                f.write("pause\n")
+            else:
+                f.write("#!/bin/sh\n")
+                f.write('echo "[Pygantry] Starting..."\n')
+                f.write('source .gantry/bin/activate\n')
+                f.write('python -m cowsay "Shipped with Pygantry v1.2!"\n')
+        if os.name != "nt":
+            os.chmod(launcher, 0o755)
+        
+        zip_path = shutil.make_archive(archive, "zip", stage)
+        shutil.rmtree(stage)
+        print(f"📦 Shipped to: {zip_path}")
+        print("\n⚠️  Note: Target machine needs same Python version installed")
+        return zip_path

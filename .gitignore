@@ -1,13 +1,49 @@
-# Environnements
+# Environnements virtuels Pygantry
+.gantry/
 .gantry_env/
-.pyc_env/
-__pycache__/
-*.pyc
-
-# Secrets du Founder (À NE JAMAIS PUBLIER)
-founder.key
+.ship_stage/
 *.zip
 
-# OS
+# Fichiers Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Dépendances
+venv/
+env/
+.venv/
+ENV/
+
+# Fichiers système
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# Logs & backups
+*.log
+*.bak
+*.tmp
+
+# Clés premium (NE JAMAIS pusher !)
+founder.key
+
+# Fichiers de données temporaires
+data/
+*.txt
+*.pdf
+*.docx
