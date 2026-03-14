@@ -5,12 +5,13 @@ import subprocess
 import sys
 import venv
 import yaml
+import typer
 
 class PyGantryEngine:
     def __init__(self, manifest_path="Gantryfile", env_dir=".gantry"):
         self.manifest_path = manifest_path
         self.env_dir = env_dir
-
+    
     def create_manifest(self, project_name="my_app"):
         config = {
             "project": project_name,
@@ -20,12 +21,12 @@ class PyGantryEngine:
         }
         with open(self.manifest_path, "w", encoding="utf-8") as f:
             yaml.dump(config, f, sort_keys=False)
-        print(f"✓ Gantryfile created for '{project_name}'")
-
+        typer.echo("[OK] Gantryfile created for '{}'".format(project_name))
+    
     def build(self):
         if os.path.exists(self.env_dir):
             shutil.rmtree(self.env_dir, ignore_errors=True)
-        print("🏗️  Building environment...")
+        typer.echo("Building environment...")
         venv.create(self.env_dir, with_pip=True, symlinks=False)
         
         with open(self.manifest_path, encoding="utf-8") as f:
@@ -33,12 +34,12 @@ class PyGantryEngine:
         
         packages = config.get("packages", [])
         if packages:
-            print(f"   → Installing packages: {', '.join(packages)}")
+            typer.echo("   -> Installing packages: {}".format(', '.join(packages)))
             bin_dir = "Scripts" if os.name == "nt" else "bin"
-            pip = os.path.join(self.env_dir, bin_dir, "pip")
+            pip = os.path.join(self.env_dir, bin_dir, "pip.exe" if os.name == "nt" else "pip")
             subprocess.run([pip, "install", "-q"] + packages, check=True)
-        print(f"✅ Built in ./{self.env_dir}")
-
+        typer.echo("[OK] Built in ./{}".format(self.env_dir))
+    
     def run(self):
         if not os.path.exists(self.env_dir):
             raise RuntimeError("Run 'pyg build' first")
@@ -54,11 +55,11 @@ class PyGantryEngine:
         
         entry = config.get("entrypoint", "python --version")
         if entry.startswith("python "):
-            entry = entry.replace("python ", f'"{python}" ', 1)
+            entry = entry.replace("python ", '"{}" '.format(python), 1)
         
-        print(f"🚀 {entry}")
+        typer.echo("Running: {}".format(entry))
         subprocess.run(entry, shell=True, env=env)
-
+    
     def ship(self):
         if not os.path.exists(self.env_dir):
             raise RuntimeError("Run 'pyg build' first")
@@ -67,7 +68,7 @@ class PyGantryEngine:
             config = yaml.safe_load(f)
         
         project = config.get("project", "app")
-        archive = f"{project}_v1.2"
+        archive = "{}_v1.2".format(project)
         
         stage = ".ship_stage"
         if os.path.exists(stage):
@@ -83,7 +84,7 @@ class PyGantryEngine:
                 f.write("@echo off\n")
                 f.write("echo [Pygantry] Starting...\n")
                 f.write("call .gantry\\Scripts\\activate.bat >nul 2>&1\n")
-                f.write("python -m cowsay \"Shipped with Pygantry v1.2!\"\n")
+                f.write('python -m cowsay "Shipped with Pygantry v1.2!"\n')
                 f.write("pause\n")
             else:
                 f.write("#!/bin/sh\n")
@@ -95,6 +96,6 @@ class PyGantryEngine:
         
         zip_path = shutil.make_archive(archive, "zip", stage)
         shutil.rmtree(stage)
-        print(f"📦 Shipped to: {zip_path}")
-        print("\n⚠️  Note: Target machine needs same Python version installed")
+        typer.echo("[OK] Shipped to: {}".format(zip_path))
+        typer.echo("\n[WARNING] Note: Target machine needs same Python version installed")
         return zip_path

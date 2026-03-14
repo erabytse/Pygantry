@@ -1,0 +1,5 @@
+project: mon_projet
+python: '3.11'
+packages:
+- cowsay
+entrypoint: python -m cowsay -t "Pygantry v1.2 Online!"

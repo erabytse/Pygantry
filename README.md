@@ -1,6 +1,13 @@
 # 🏗️ Pygantry
 **The ultra-lightweight Python container engine.**
 
+[![CI](https://github.com/erabytse/Pygantry/actions/workflows/ci.yml/badge.svg)](https://github.com/erabytse/Pygantry/actions/workflows/ci.yml)
+[![PyPI version](https://badge.fury.io/py/pygantry.svg)](https://pypi.org/project/pygantry/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+**Docker-like simplicity for Python projects — without the overhead.**
+
 Why ship a whole Linux OS with Docker when you only need a Python environment? 
 **Pygantry** packages your app and its dependencies into a portable, relocatable "Gantry" that works anywhere.
 
